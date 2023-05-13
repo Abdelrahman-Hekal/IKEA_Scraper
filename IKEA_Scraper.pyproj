@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>c2fd20d8-945d-454e-93e8-ce0342c5718c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>IKEA_Scraper_v1.py</StartupFile>
+    <StartupFile>IKEA_Scraper_v1.1.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="IKEA_Scraper_v1.py" />
+    <Compile Include="IKEA_Scraper_v1.1.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
