@@ -5,7 +5,7 @@ block_cipher = None
 
 
 a = Analysis(
-    ['D:\\Personal\\Freelancing\\IKEA_Scraper\\IKEA_Scraper_v1.1.py'],
+    ['D:\\Personal\\Freelancing\\IKEA_Scraper\\IKEA_Scraper_v1.2.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -28,7 +28,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='IKEA_Scraper_v1.1',
+    name='IKEA_Scraper_v1.2',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

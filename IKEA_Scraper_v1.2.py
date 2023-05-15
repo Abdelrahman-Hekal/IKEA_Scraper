@@ -56,8 +56,9 @@ def scrape_IKEA(driver, output1, page, cat):
 
     print('-'*75)
     print(f'Scraping products Links from: {page}')
-    stamp = datetime.now().strftime("%d_%m_%Y_%H_%M")
+    stamp = datetime.now().strftime("%d_%m_%Y")
 
+    colors = ["anthracite", "anthracite-brown", "beige", "beige/anthracite", "beige/brown", "beige/brown-black", "beige/grey", "black", "black stained", "black/beige", "black/metal", "black/wood", "black-beige/grey", "black-black", "black-black-brown", "black-blue", "black-brown-anthracite", "black-brown-beige", "black-brown-black", "black-brown-dark blue", "black-brown-dark brown", "black-brown-dark grey", "black-brown-eggshell", "black-brown-light beige", "black-brown-white/black", "black-brown-yellow", "black-grey", "black-light grey", "blue", "blue-brown", "bright green", "brown", "brown-anthracite", "brown-beige", "brown-black", "brown-brown", "brown-dark blue", "brown-dark brown", "brown-dark grey", "brown-eggshell", "brown-light beige", "brown-red-beige/grey", "brown-white/black", "brown-yellow", "dark beige/metal", "dark beige/wood", "dark blue", "dark brown", "dark green", "dark green/metal", "dark green/wood", "dark green-blue", "dark green-blue-black", "dark grey", "dark grey/black", "dark grey/metal", "dark grey/wood", "dark grey-dark grey", "dark red", "dark turquoise", "dark yellow-dark yellow", "dark yellow-green", "eggshell", "golden-brown", "golden-brown/metal", "golden-brown/wood", "grey", "grey/beige", "grey/black", "grey/green", "grey/green-brown", "grey-beige", "grey-green/metal", "grey-green/wood", "grey-turquoise", "light beige", "light beige-brown", "light blue", "light brown-pink", "light green", "light green/metal", "light green/wood", "light grey", "light grey-turquoise", "light pink", "light red", "light turquoise", "light white-grey", "medium blue", "medium grey", "medium grey-brown", "multicolour", "natural", "natural colour", "olive-green", "orange", "purple", "rattan", "red", "red stained", "red/brown", "red/brown-black", "red/white", "red-brown", "white", "white stained oak veneer", "white/black", "yellow", "yellow-green"]
     # getting the products list
     links = []
     driver.get(page)
@@ -222,6 +223,12 @@ def scrape_IKEA(driver, output1, page, cat):
             except:
                 pass
 
+            if color == '':
+                for elem in colors:
+                    if elem in name.lower():
+                        color = elem.title()
+                        break
+
             details['Colour'] = color  
 
             # product materials
@@ -249,11 +256,14 @@ def scrape_IKEA(driver, output1, page, cat):
            
     # output to excel
     if data.shape[0] > 0:
-        data['Extraction Date'] = pd.to_datetime(data['Extraction Date'])
+        data['Extraction Date'] = pd.to_datetime(data['Extraction Date'],  errors='coerce', format="%d_%m_%Y")
+        data['Extraction Date'] = data['Extraction Date'].dt.date   
         df1 = pd.read_excel(output1)
         df1 = df1.append(data)   
         df1 = df1.drop_duplicates()
-        df1.to_excel(output1, index=False)
+        writer = pd.ExcelWriter(output1, date_format='d/m/yyyy')
+        df1.to_excel(writer, index=False)
+        writer.close()
     else:
         print('-'*75)
         print(f'No valid products Found in: {page}')
@@ -303,18 +313,6 @@ def get_inputs():
         print('Error: Failed to process the settings sheet')
         input('Press any key to exit')
         sys.exit(1)
-
-    # checking the settings dictionary
-    #keys = ["Posts Limit"]
-    #for key in keys:
-    #    if key not in settings.keys():
-    #        print(f"Warning: the setting '{key}' is not present in the settings file")
-    #        settings[key] = 1
-    #    try:
-    #        settings[key] = int(float(settings[key]))
-    #    except:
-    #        input(f"Error: Incorrect value for '{key}', values must be numeric only, press an key to exit.")
-    #        sys.exit(1)
 
     return urls
 
@@ -374,6 +372,7 @@ def main():
     elapsed_time = round(((time.time() - start)/60), 2)
     hrs = round(elapsed_time/60, 2)
     input(f'Process is completed in {elapsed_time} mins ({hrs} hours), Press any key to exit.')
+    sys.exit()
 
 if __name__ == '__main__':
 
