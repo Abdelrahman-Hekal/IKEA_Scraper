@@ -52,37 +52,37 @@ def initialize_bot():
 
     return driver
 
-def scrape_IKEA(driver, output1, page, cat):
+def scrape_IKEA(driver, output1, page, cat, colors):
 
     print('-'*75)
     print(f'Scraping products Links from: {page}')
     stamp = datetime.now().strftime("%d_%m_%Y")
 
-    colors = ["anthracite", "anthracite-brown", "beige", "beige/anthracite", "beige/brown", "beige/brown-black", "beige/grey", "black", "black stained", "black/beige", "black/metal", "black/wood", "black-beige/grey", "black-black", "black-black-brown", "black-blue", "black-brown-anthracite", "black-brown-beige", "black-brown-black", "black-brown-dark blue", "black-brown-dark brown", "black-brown-dark grey", "black-brown-eggshell", "black-brown-light beige", "black-brown-white/black", "black-brown-yellow", "black-grey", "black-light grey", "blue", "blue-brown", "bright green", "brown", "brown-anthracite", "brown-beige", "brown-black", "brown-brown", "brown-dark blue", "brown-dark brown", "brown-dark grey", "brown-eggshell", "brown-light beige", "brown-red-beige/grey", "brown-white/black", "brown-yellow", "dark beige/metal", "dark beige/wood", "dark blue", "dark brown", "dark green", "dark green/metal", "dark green/wood", "dark green-blue", "dark green-blue-black", "dark grey", "dark grey/black", "dark grey/metal", "dark grey/wood", "dark grey-dark grey", "dark red", "dark turquoise", "dark yellow-dark yellow", "dark yellow-green", "eggshell", "golden-brown", "golden-brown/metal", "golden-brown/wood", "grey", "grey/beige", "grey/black", "grey/green", "grey/green-brown", "grey-beige", "grey-green/metal", "grey-green/wood", "grey-turquoise", "light beige", "light beige-brown", "light blue", "light brown-pink", "light green", "light green/metal", "light green/wood", "light grey", "light grey-turquoise", "light pink", "light red", "light turquoise", "light white-grey", "medium blue", "medium grey", "medium grey-brown", "multicolour", "natural", "natural colour", "olive-green", "orange", "purple", "rattan", "red", "red stained", "red/brown", "red/brown-black", "red/white", "red-brown", "white", "white stained oak veneer", "white/black", "yellow", "yellow-green"]
     # getting the products list
     links = []
     driver.get(page)
-
+    ipage = 1
     while True:
         # scraping products urls 
         try:
-            prods = wait(driver, 2).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div[class*='itemInfo']")))    
+            prods = wait(driver, 4).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div[class*='itemInfo']")))    
         except:
             print('No products are available')
             return
 
         for prod in prods:
             try:
-                link = wait(prod, 2).until(EC.presence_of_element_located((By.TAG_NAME, "a"))).get_attribute('href') 
-                if link not in links:
-                    links.append(link)
+                link = wait(prod, 4).until(EC.presence_of_element_located((By.TAG_NAME, "a"))).get_attribute('href') 
+                #if link not in links:
+                links.append(link)
             except:
                 pass
 
         # moving to the next page
         try:
-            url = wait(driver, 2).until(EC.presence_of_element_located((By.XPATH, "//a[@aria-label='Next']"))).get_attribute('data-sitemap-url') 
-            driver.get(url)
+            wait(driver, 4).until(EC.presence_of_element_located((By.XPATH, "//a[@aria-label='Next']")))
+            ipage += 1
+            driver.get(page + f'&page={ipage}')
         except:
             break
 
@@ -111,8 +111,8 @@ def scrape_IKEA(driver, output1, page, cat):
             # Chinese name
             series, name = '', ''  
             try:
-                series = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='itemName']"))).get_attribute('textContent').strip()
-                name = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemDetails']"))).get_attribute('textContent').strip()
+                series = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='itemName']"))).get_attribute('textContent').strip()
+                name = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemDetails']"))).get_attribute('textContent').strip()
             except Exception as err:
                 pass
             
@@ -127,8 +127,8 @@ def scrape_IKEA(driver, output1, page, cat):
 
             series, name = '', ''  
             try:
-                series = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='itemName']"))).get_attribute('textContent').strip()
-                name = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemDetails']"))).get_attribute('textContent').strip()
+                series = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='itemName']"))).get_attribute('textContent').strip()
+                name = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemDetails']"))).get_attribute('textContent').strip()
             except Exception as err:
                 pass
             
@@ -137,18 +137,18 @@ def scrape_IKEA(driver, output1, page, cat):
             # Product ID
             prod_id = ''             
             try:
-                prod_id = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='item-code']"))).get_attribute('textContent').strip()
+                prod_id = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span[class='item-code']"))).get_attribute('textContent').strip()
             except:
                 continue  
 
             details['Product ID'] = prod_id 
-            details['Link'] = link 
+            details['Link'] = driver.current_url 
                            
             # product image
             img = ''             
             try:
-                a = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='slideImg']")))
-                img = wait(a, 2).until(EC.presence_of_element_located((By.TAG_NAME, "img"))).get_attribute('src')
+                a = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[class='slideImg']")))
+                img = wait(a, 4).until(EC.presence_of_element_located((By.TAG_NAME, "img"))).get_attribute('src')
             except:
                 continue 
                 
@@ -157,7 +157,7 @@ def scrape_IKEA(driver, output1, page, cat):
             # Product outline
             outline = ''             
             try:
-                outline = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='product-desc-wrapper']"))).get_attribute('textContent').strip()
+                outline = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='product-desc-wrapper']"))).get_attribute('textContent').strip()
             except:
                 pass 
             
@@ -166,7 +166,7 @@ def scrape_IKEA(driver, output1, page, cat):
             # product price
             price = ''
             try:
-                price = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemPrice-wrapper']"))).get_attribute('textContent').replace('$', '').strip().replace(',', '')
+                price = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class='itemPrice-wrapper']"))).get_attribute('textContent').replace('$', '').strip().replace(',', '')
             except:
                 pass
 
@@ -175,14 +175,14 @@ def scrape_IKEA(driver, output1, page, cat):
             # product description
             des = ''             
             try:
-                button = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='product-detail-details']")))
+                button = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='product-detail-details']")))
                 driver.execute_script("arguments[0].click();", button)
                 time.sleep(1)
                 try:
-                    des = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='full-length-text-content']"))).get_attribute('textContent').strip()
+                    des = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='full-length-text-content']"))).get_attribute('textContent').strip()
                 except:
-                    des = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='product-desc-wrapper']"))).get_attribute('textContent').strip()
-                htmlelement= wait(driver, 2).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
+                    des = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='product-desc-wrapper']"))).get_attribute('textContent').strip()
+                htmlelement= wait(driver, 4).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
                 htmlelement.send_keys(Keys.ENTER)
                 time.sleep(1)
             except:
@@ -196,18 +196,18 @@ def scrape_IKEA(driver, output1, page, cat):
             # other info
             info = ''             
             try:
-                button = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='measuarements-details']")))
+                button = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='measuarements-details']")))
                 driver.execute_script("arguments[0].click();", button)
                 time.sleep(1)
-                div = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='measurements-container']")))
-                trs = wait(div, 2).until(EC.presence_of_all_elements_located((By.TAG_NAME, "tr")))
+                div = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[class*='measurements-container']")))
+                trs = wait(div, 4).until(EC.presence_of_all_elements_located((By.TAG_NAME, "tr")))
                 for tr in trs:
                     try:
                         info += tr.get_attribute('textContent').replace('\n', '').replace(':', ':, ').strip() + '; '
                     except:
                         pass
                 info = info[:-2]
-                htmlelement= wait(driver, 2).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
+                htmlelement= wait(driver, 4).until(EC.presence_of_element_located((By.TAG_NAME, "html")))
                 htmlelement.send_keys(Keys.ENTER)
                 time.sleep(1)
             except:
@@ -219,26 +219,44 @@ def scrape_IKEA(driver, output1, page, cat):
             # product color
             color = ''
             try:
-                color = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span[id='variation-selected-subtitle']"))).get_attribute('textContent').strip().title()
+                color = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "span[id='variation-selected-subtitle']"))).get_attribute('textContent').strip().title()
             except:
                 pass
 
             if color == '':
-                for elem in colors:
-                    if elem in name.lower():
-                        color = elem.title()
-                        break
+                try:
+                    text = name.lower()
+                    for elem in colors:
+                        if elem in text:
+                            color = elem.title()
+                            # check for light, medium and dark grades of the color
+                            if f'dark {elem}' in text and 'dark' not in elem:
+                                color = 'Dark ' + elem.title()                        
+                            elif f'medium {elem}' in text and 'medium' not in elem:
+                                color = 'Medium ' + elem.title()                        
+                            elif f'light {elem}' in text and 'light' not in elem:
+                                color = 'Light ' + elem.title()
+                            # check colors mix with / or -
+                            if '/' in text or '-' in text:
+                                words = text.split()
+                                for word in words:
+                                    if elem in word and ('/' in word or '-' in word):
+                                        color = word.title().replace(',', '')
+                                        break
+                            break
+                except:
+                    pass
 
             details['Colour'] = color  
 
             # product materials
             mat = ''             
             try:
-                button = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='product-detail-details']")))
+                button = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "a[data-open*='product-detail-details']")))
                 driver.execute_script("arguments[0].click();", button)
                 time.sleep(2)
-                div = wait(driver, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[id='materials-details']")))
-                mat_div = wait(div, 2).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div[class='mb-3']")))[-1]
+                div = wait(driver, 4).until(EC.presence_of_element_located((By.CSS_SELECTOR, "div[id='materials-details']")))
+                mat_div = wait(div, 4).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, "div[class='mb-3']")))[-1]
                 mat = mat_div.get_attribute('innerHTML').replace('\n', '').replace('<br>', '\n').strip()
                 #removing other HTML tags from text
                 mat = re.compile(r'<[^>]+>').sub('', mat)
@@ -284,7 +302,7 @@ def get_inputs():
         input('Press any key to exit')
         sys.exit(1)
     try:
-        urls = []
+        urls, colors = [], []
         df = pd.read_excel(path)
         cols  = df.columns
         for col in cols:
@@ -301,11 +319,13 @@ def get_inputs():
                 elif col == 'Scrape':
                     status = row[col]                
                 elif col == 'Type':
-                    link_type = row[col]
+                    link_type = row[col]                
+                elif col == 'Colors':
+                    colors.append(row[col].lower())
 
             if link != '' and status != '' and link_type != '':
                 try:
-                    status = int(status)
+                    status = int(float(status))
                     urls.append((link, status, link_type))
                 except:
                     urls.append((link, 0, link_type))
@@ -314,7 +334,7 @@ def get_inputs():
         input('Press any key to exit')
         sys.exit(1)
 
-    return urls
+    return urls, colors
 
 def initialize_output():
 
@@ -345,7 +365,7 @@ def main():
     freeze_support()
     start = time.time()
     output1 = initialize_output()
-    urls = get_inputs()
+    urls, colors = get_inputs()
     try:
         driver = initialize_bot()
     except Exception as err:
@@ -360,7 +380,7 @@ def main():
         link = url[0]
         cat = url[2]
         try:
-            scrape_IKEA(driver, output1, link, cat)
+            scrape_IKEA(driver, output1, link, cat, colors)
         except Exception as err: 
             print(f'Warning: the below error occurred:\n {err}')
             driver.quit()
@@ -369,8 +389,8 @@ def main():
 
     driver.quit()
     print('-'*75)
-    elapsed_time = round(((time.time() - start)/60), 2)
-    hrs = round(elapsed_time/60, 2)
+    elapsed_time = round(((time.time() - start)/60), 4)
+    hrs = round(elapsed_time/60, 4)
     input(f'Process is completed in {elapsed_time} mins ({hrs} hours), Press any key to exit.')
     sys.exit()
 
